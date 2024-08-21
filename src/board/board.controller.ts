@@ -6,19 +6,16 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { BoardService } from './board.service';
+import { S3Service } from 'src/s3/s3.service';
 
 @Controller('board')
 export class BoardController {
-  constructor(private readonly boardService: BoardService) {}
+  constructor(private readonly s3Service: S3Service) {}
 
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(200)
   @Post('image')
   async saveImage(@UploadedFile() file: Express.Multer.File) {
-    console.log('욧총');
-
-    console.log(file, 'file');
-    return await this.boardService.imageUpload(file);
+    return await this.s3Service.imageUpload(file);
   }
 }

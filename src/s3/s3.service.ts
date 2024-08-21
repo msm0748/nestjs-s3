@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class S3Service {
   s3Client: S3Client;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private utilsService: UtilsService,
+  ) {
     // AWS S3 클라이언트 초기화. 환경 설정 정보를 사용하여 AWS 리전, Access Key, Secret Key를 설정.
     this.s3Client = new S3Client({
       region: this.configService.get('S3_REGION'), // AWS Region
@@ -38,17 +42,16 @@ export class S3Service {
     return `https://s3.${process.env.S3_REGION}.amazonaws.com/${process.env.S3_BUCKET_NAME}/${fileName}`;
   }
 
-  async uploadMultipleFiles(files: Express.Multer.File[]) {
-    // Promise 배열 생성: 각 파일을 imageUploadToS3 메서드를 사용하여 업로드합니다.
-    const uploadPromises = files.map((file) => {
-      const ext = file.originalname.split('.').pop(); // 확장자 추출
-      const fileName = `${Date.now()}-${file.originalname}`; // 고유 파일 이름 생성
+  async imageUpload(file: Express.Multer.File) {
+    const imageName = this.utilsService.getUUID();
+    const ext = file.originalname.split('.').pop();
 
-      // imageUploadToS3 메서드 호출
-      return this.imageUploadToS3(fileName, file, ext);
-    });
+    const imageUrl = await this.imageUploadToS3(
+      `${imageName}.${ext}`,
+      file,
+      ext,
+    );
 
-    // 모든 파일이 업로드될 때까지 대기하고, 결과 배열을 반환합니다.
-    return Promise.all(uploadPromises);
+    return { imageUrl };
   }
 }

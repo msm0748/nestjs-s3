@@ -7,7 +7,8 @@ import { BoardService } from './board/board.service';
 import { BoardController } from './board/board.controller';
 import { BoardModule } from './board/board.module';
 import { UtilsModule } from './utils/utils.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { UtilsService } from './utils/utils.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AppController, BoardController],
-  providers: [AppService, S3Service, BoardService, ConfigService],
+  providers: [AppService, S3Service, BoardService, UtilsService],
 })
 export class AppModule {}
